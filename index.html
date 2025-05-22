@@ -1,70 +1,1596 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rural Childcare Services</title>
+    <title>Rural Childcare Sponsorship Navigator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Application Structure Plan:
+        Overall Approach: A thematic, single-page application designed for progressive disclosure. Users navigate through key themes derived from the report.
+        Navigation: Sticky top navigation bar.
+        Sections: 1. The Crisis, 2. Visa Pathways, 3. For Employers, 4. For Candidates, 5. Rural Realities & Support, 6. DAMA Application Guide, 7. App Vision.
+        Interactions: Clickable navigation, expandable content sections, interactive charts, LLM-powered text generation, and a simulated app matching demo.
+        User Flow: Overview to specific details, or sequential exploration.
+        Why this structure?: Improves usability and understanding of dense report content by focusing on user journeys (employer/candidate needs) and progressive information access.
+    -->
+    <!-- Visualization & Content Choices:
+        - Executive Summary/Intro: Inform & Context. HTML, Tailwind.
+        - Critical Need/Table 1: Inform & Compare. Chart.js Bar Chart for stats. HTML, Tailwind.
+        - Migration Pathways/Table 2: Inform & Compare. HTML/Tailwind for structured comparison (cards/table).
+        - Employer Sponsorship: Inform & Organize. HTML/Tailwind for process steps (styled lists/diagrams), expandable sections. Added LLM features for 'Genuine Need Justification', 'Draft Sponsored Role Job Description', 'Relocation Support Checklist Generator', 'Interview Question Generator', and 'DAMA Concession Explainer'.
+        - Candidate Eligibility: Inform & Organize. HTML/Tailwind structured text, expandable sections. Added LLM features for 'Visa Eligibility Insights', 'ACECQA Assessment Prep Guide', 'Rural Lifestyle Insights', 'Local Services Guide', and 'Rural Role Cover Letter Assistant'.
+        - Challenges & Mitigation: Inform & Organize. HTML/Tailwind lists, summaries, expandable sections.
+        - DAMA Application Guide: Detailed steps for DAMA skills assessment, using accordions for each step.
+        - App Recommendations (brief): Inform. HTML/Tailwind summary. Added 'Interactive App Matching Demo' to simulate core app functionality.
+        - Justification: To make complex information digestible, visually appealing, and interactive where appropriate. LLM features enhance practical application of information and provide targeted assistance. The interactive demo provides a tangible glimpse into the proposed app's core value.
+    -->
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .nav-link.active { color: #2563eb; font-weight: 500; }
+        body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .nav-link { transition: color 0.3s ease; }
+        .nav-link:hover, .nav-link.active { color: #0284c7; /* sky-600 */ }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        [x-cloak] { display: none !important; }
+        .sticky-nav { position: -webkit-sticky; position: sticky; top: 0; z-index: 50; }
+        .llm-output { white-space: pre-wrap; word-wrap: break-word; }
     </style>
 </head>
-<body class="bg-gray-50">
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <div class="flex-shrink-0 flex items-center">
-                        <h1 class="text-xl font-bold text-blue-600">Rural Childcare Services</h1>
-                    </div>
-                    <div class="hidden md:ml-6 md:flex md:space-x-8">
-                        <a href="#" onclick="showTab('home')" class="nav-link inline-flex items-center px-1 pt-1 text-gray-600">Home</a>
-                        <a href="#" onclick="showTab('services')" class="nav-link inline-flex items-center px-1 pt-1 text-gray-600">Services</a>
-                        <a href="Dama/index.html" class="nav-link inline-flex items-center px-1 pt-1 text-gray-600">DAMA Guide</a>
-                    </div>
+<body class="bg-amber-50 text-neutral-800 antialiased">
+
+    <header class="sticky-nav bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-sky-700">Childcare Sponsorship Navigator</span>
+                </div>
+                <nav class="hidden md:flex space-x-4">
+                    <a href="#crisis" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">The Crisis</a>
+                    <a href="#visas" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">Visa Pathways</a>
+                    <a href="#employers" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">For Employers</a>
+                    <a href="#candidates" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">For Candidates</a>
+                    <a href="#support" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">Rural Realities</a>
+                    <a href="#dama-application-guide" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">DAMA Guide</a>
+                    <a href="#app-vision" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">App Vision</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-neutral-700 hover:text-sky-600 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto py-6 px-4">
-        <div id="home" class="tab-content">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Welcome to Rural Childcare Services</h2>
-            <p class="text-gray-600">Connecting rural communities with quality childcare services.</p>
+        <div id="mobile-menu" class="md:hidden hidden bg-white shadow-lg">
+            <a href="#crisis" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">The Crisis</a>
+            <a href="#visas" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">Visa Pathways</a>
+            <a href="#employers" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">For Employers</a>
+            <a href="#candidates" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">For Candidates</a>
+            <a href="#support" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">Rural Realities</a>
+            <a href="#dama-application-guide" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">DAMA Guide</a>
+            <a href="#app-vision" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">App Vision</a>
         </div>
+    </header>
 
-        <div id="services" class="tab-content hidden">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">Our Services</h2>
-            <p class="text-gray-600">Information about available childcare services in rural areas.</p>
-        </div>
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <section id="crisis" class="pt-16 -mt-16 mb-12">
+            <h1 class="text-3xl font-bold text-sky-700 mb-6 text-center">The Rural Childcare Crisis in Queensland</h1>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <p class="mb-4 text-lg leading-relaxed">
+                    Rural Queensland faces an acute and escalating shortage of Early Childhood Education and Care (ECEC) professionals. This critical workforce crisis profoundly impacts the availability and quality of childcare services, directly hindering parents' ability to participate in the workforce and diminishing the overall liveability and economic vitality of regional communities. Skilled migration, particularly through pathways designed to address regional needs, has emerged as an indispensable solution to bridge this growing gap. This interactive guide explores the multifaceted challenges, available visa pathways, and crucial support systems for successfully sponsoring international childcare workers to rural Queensland.
+                </p>
+                <p class="mb-6 text-md leading-relaxed">
+                    The data below vividly illustrates the severity of these workforce shortages and their direct impact on service accessibility in key regional areas. For instance, in Western Downs, only 22% of children aged 0-4 years are accommodated in ECEC services, with waiting lists often exceeding 12 months. Across Queensland, early 2023 saw 23.3% of long day care services applying for staffing exemption waivers, underscoring the widespread nature of the crisis. Childcare Workers and Early Childhood Teachers are consistently identified as occupations experiencing national shortages, with over 1,500 vacancies in Queensland alone. Understanding this stark reality is crucial for appreciating the urgent need for innovative solutions like targeted international recruitment and robust sponsorship programs.
+                </p>
+                <div class="chart-container mx-auto mb-6 h-96 md:h-[450px]">
+                    <canvas id="crisisStatsChart"></canvas>
+                </div>
+                <p class="text-sm text-neutral-600 leading-relaxed">
+                    The demand for childcare services continues to rise, driven by a 12% increase in enrolments over the last five years, population growth in regional areas, higher fertility rates, and increased female workforce participation. Despite significant government investment through the Child Care Subsidy (CCS), many services operate at full capacity due to staff shortages, preventing them from expanding or even maintaining their licensed capacity. This not only limits access for families but also compromises the quality of care and leads to "spot closures," further disrupting community life. The ECEC sector is recognized as a "critical occupation" for the fundamental functionality and prosperity of regional communities.
+                </p>
+            </div>
+        </section>
+
+        <section id="visas" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold text-sky-700 mb-8 text-center">Australian Skilled Migration Pathways</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                 <p class="mb-6 text-lg leading-relaxed">
+                    Australia offers several structured visa pathways for skilled childcare professionals, each with distinct requirements and benefits. Understanding the nuances of these options is paramount for both employers seeking to sponsor and candidates aiming to work in Australia. The primary pathways include the upcoming Skills in Demand (SID) Visa, existing Designated Area Migration Agreements (DAMAs) tailored for regional needs, and the Training Visa, which can serve as a strategic stepping stone. This section provides a detailed overview and comparative analysis to help you identify the most suitable route for your circumstances.
+                </p>
+
+                <div class="space-y-8">
+                    <div class="p-6 bg-amber-50 rounded-lg shadow">
+                        <h3 class="text-2xl font-semibold text-sky-600 mb-3">Skills in Demand (SID) Visa (Subclass 482)</h3>
+                        <p class="mb-2">The Skills in Demand (SID) visa is set to replace the existing Temporary Skill Shortage (TSS) visa (Subclass 482) by the end of 2024, aiming to streamline and improve the skilled migration process. This new visa offers a longer duration of up to 4 or 5 years, providing greater stability for both employers and sponsored workers.</p>
+                        <p class="mb-2">A key enhancement is the clearer pathway to Permanent Residency (PR) through the Employer Nomination Scheme (ENS) visa (Subclass 186) after just 2-3 years, significantly reducing the waiting period compared to previous arrangements. Processing times are also expected to be faster, with an average of 21 days for the Core Skills Stream, which includes most childcare occupations. The SID visa also offers increased job flexibility, allowing workers to change employers more easily within their nominated occupation.</p>
+                        <p class="mb-2"><strong class="text-neutral-700">Eligible Occupations (Core Skills Occupation List - CSOL):</strong> Child Care Worker (ANZSCO 421111), Family Day Care Worker (421112), Nanny (421113), Out of School Hours Care Worker (421114), and Early Childhood Teachers (ECTs).</p>
+                        <p><strong class="text-neutral-700">Core Skills Income Threshold (CSIT):</strong> A critical requirement is that the sponsored worker's annual earnings must meet or exceed the CSIT, which is currently $73,150 but will rise to $76,515 from July 2025. This threshold can include guaranteed allowances, ensuring a competitive and fair wage. Employers must demonstrate that the offered salary meets both the CSIT and the Annual Market Salary Rate (AMSR) for the role.</p>
+                    </div>
+
+                    <div class="p-6 bg-amber-50 rounded-lg shadow">
+                        <h3 class="2xl font-semibold text-sky-600 mb-3">Designated Area Migration Agreements (DAMAs)</h3>
+                        <p class="mb-2">Designated Area Migration Agreements (DAMAs) are formal, bespoke agreements established between the Australian Government and specific regional areas. Their primary purpose is to address the unique economic and labour market needs of these regions, offering a more flexible and streamlined pathway to access skilled overseas workers when local recruitment efforts have been genuinely exhausted.</p>
+                        <p class="mb-2">DAMAs often provide enhanced Permanent Residency (PR) pathways, offering a more direct route to settlement for sponsored workers. Crucially, they can include significant concessions on standard visa criteria. For childcare workers, these concessions might involve:</p>
+                        <ul class="list-disc list-inside ml-4 text-neutral-700 space-y-1">
+                            <li><strong class="text-neutral-700">Lower English Language Requirements:</strong> Reduced IELTS or PTE scores compared to standard visas.</li>
+                            <li><strong class="text-neutral-700">Higher Age Limits:</strong> For example, some DAMAs, like the Orana DAMA and the Townsville North Queensland (TNQ) DAMA, allow for age limits up to 55 for childcare occupations.</li>
+                            <li><strong class="text-neutral-700">Lower Salary Thresholds:</strong> Often set at 90% of the CSIT, and may allow for non-monetary benefits (up to 10% of the salary) to be counted towards the threshold, reflecting the cost of living in regional areas.</li>
+                        </ul>
+                        <p class="mt-2">The Child Care Worker occupation is specifically identified for concessions under the TNQ DAMA, highlighting its importance to the region. Additionally, DAMAs may accept a reduced work experience requirement, such as 1 year of full-time equivalent work experience, making it more accessible for eligible candidates. Overseas qualifications for DAMA-specific occupations are assessed by ACECQA under DAMA guidelines, which may differ from standard assessments.</p>
+                    </div>
+
+                    <div class="p-6 bg-amber-50 rounded-lg shadow">
+                        <h3 class="2xl font-semibold text-sky-600 mb-3">Training Visa (Subclass 407)</h3>
+                        <p class="mb-2">The Training Visa (Subclass 407) is a temporary visa that allows individuals to participate in structured, workplace-based training programs in Australia for up to two years. This visa does not have the Core Skills Income Threshold (CSIT) requirement, making it a flexible option for certain training scenarios.</p>
+                        <p>It serves as a strategic stepping-stone for international childcare professionals who may need to gain Australian work experience, receive specific training to meet Australian qualification standards, or improve their English language skills before applying for a longer-term skilled visa like the SID 482 visa. The training must be directly related to the nominated occupation and contribute to the applicant's skill development.</p>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-sky-700 mt-10 mb-4 text-center">Visa Pathway Comparison</h3>
+                <div class="overflow-x-auto bg-stone-50 p-4 rounded-md shadow">
+                    <table class="min-w-full divide-y divide-stone-300">
+                        <thead class="bg-stone-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">Requirement</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">SID 482 (Core Skills)</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-neutral-600 uppercase tracking-wider">DAMA</th>
+                                <th class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-600 uppercase tracking-wider">Training Visa 407</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-stone-200">
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-900">Min. Qualification</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Cert III ECEC / Diploma / Bachelor (ECT)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Recognised childcare qualification (Cert III/IV equiv.)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Completed childcare qualifications</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-900">Min. Work Experience</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">1 yr full-time equiv. (last 5 yrs)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">1 yr full-time equiv. (concession)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Sponsorship for training/upskilling</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-900">English Proficiency</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Required (e.g., IELTS)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">DAMA concessions</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Required</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-900">Income Threshold</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">CSIT $73,150 (rising)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">DAMA concessions (e.g., 90% CSIT)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">No CSIT requirement</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-900">Pathway to PR</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Yes (Subclass 186 ENS)</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Enhanced PR pathways</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Stepping stone to 482/186</td>
+                            </tr>
+                             <tr>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-neutral-900">Visa Duration</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Up to 4-5 years</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Varies by DAMA</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-neutral-700">Up to 2 years</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="employers" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold text-sky-700 mb-8 text-center">Information for Employers</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <p class="mb-6 text-lg leading-relaxed">
+                    Sponsoring an overseas childcare professional is a strategic investment that requires careful adherence to Australian immigration regulations. This section provides a deep dive into the essential requirements and best practices for employers, covering the journey from becoming an approved sponsor to fulfilling ongoing financial and compliance obligations. Understanding these detailed steps is crucial for a smooth and successful sponsorship process.
+                </p>
+                <div class="space-y-6">
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Becoming an Approved Standard Business Sponsor (SBS)</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>Becoming an Approved Standard Business Sponsor (SBS) is the foundational and mandatory first step for any Australian business wishing to sponsor overseas workers. This approval demonstrates to the Department of Home Affairs that your business is legitimate and capable of meeting its sponsorship obligations.</p>
+                            <p>Key requirements include:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Lawful Operation:</strong> Your business must be actively and lawfully operating in Australia. This involves demonstrating a genuine and active business presence, often through ABN registration, financial statements, and business activity.</li>
+                                <li><strong>Financial Capacity:</strong> You must prove that your business has the financial capacity to meet its sponsorship obligations, including paying the sponsored worker at or above the required salary thresholds and covering associated costs.</li>
+                                <li><strong>Commitment to Training Australians:</strong> While the Skilling Australians Fund (SAF) levy directly contributes to training Australian workers, sponsors must also demonstrate a general commitment to employing and training Australian citizens and permanent residents.</li>
+                                <li><strong>No Adverse Information:</strong> The Department will assess any adverse information about your business, such as previous breaches of immigration or workplace laws.</li>
+                            </ul>
+                            <p>The SBS approval is typically valid for five years, allowing for multiple nominations during this period without needing to re-apply for sponsorship approval each time.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">The Nomination and Visa Application Process</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>The entire sponsorship process typically involves three distinct steps:</p>
+                            <ol class="list-decimal list-inside ml-4 space-y-1">
+                                <li><strong>Standard Business Sponsorship (SBS) Approval:</strong> As detailed above, the employer first applies to become an approved sponsor.</li>
+                                <li><strong>Nomination Application:</strong> Once SBS approved, the employer then lodges a nomination application for the specific overseas worker. In this step, the employer must demonstrate a genuine need for an overseas worker to fill a specific occupation, proving that suitable local workers are unavailable.</li>
+                                <li><strong>Visa Application:</strong> The nominated overseas worker then applies for the visa (e.g., SID 482 visa), providing all required personal, qualification, and experience documents.</li>
+                            </ol>
+                            <p class="mt-2">For childcare occupations under the Core Skills Stream of the SID visa, the Department of Home Affairs aims for faster processing, with an average of 21 days for the combined nomination and visa application stages once all documentation is complete. This efficiency is crucial for addressing immediate staffing needs in rural areas.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Financial and Compliance Obligations</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>Sponsoring an overseas worker comes with significant financial and compliance obligations designed to protect both Australian workers and the sponsored individual:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Skilling Australians Fund (SAF) Levy:</strong> Employers must pay a SAF levy for each nominated worker. For the SID 482 visa, this is an upfront payment of $1,200 per year for companies with a turnover of less than $10 million, or $1,800 per year for larger companies. For the 186 permanent visa, the levy is around $3,000–$5,000, also based on employer turnover.</li>
+                                <li><strong>Annual Market Salary Rate (AMSR) and CSIT:</strong> The sponsored worker's guaranteed annual earnings must meet both the Annual Market Salary Rate (AMSR) for the occupation and the Core Skills Income Threshold (CSIT) (currently $73,150, increasing to $76,515 from 1 July 2025). The AMSR ensures that overseas workers are paid no less than an Australian citizen or permanent resident would be paid for the same role in the same location.</li>
+                                <li><strong>Worker Retention Payment Conditions:</strong> If a childcare provider opts into the "Worker Retention Payment" initiative (a government program to encourage retention), specific wage increases and fee growth limits apply. This includes a 10% wage increase above award rates and an additional 5% increase, along with limitations on how much childcare fees can increase. These additional amounts must not be excluded from calculations of penalties, loadings, termination payments, payments while on leave, or superannuation. Providers receiving this payment must also agree to limit their fee growth by a set percentage (e.g., 4.4% between August 8, 2024, and August 7, 2025). The government intends for all eligible workers, including those engaged through labour hire agencies, to receive the wage increase. The CCS-approved service is responsible for ensuring that any funding passed to a labour hire agency is indeed passed on to workers as higher wages, not absorbed by agency fees.</li>
+                                <li><strong>Other Obligations:</strong> Employers must also ensure safe working conditions, provide required documentation to the Department, notify the Department of any changes in circumstances, and not recover any costs associated with sponsorship from the visa applicant.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                     <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Demonstrating Genuine Need for Overseas Workers</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>A critical component of the nomination application is demonstrating a "genuine need" for an overseas worker. This means proving that the nominated position cannot be filled by a suitably qualified and experienced Australian citizen or permanent resident who is readily available and has the required skills and experience.</p>
+                            <p>Employers must provide compelling evidence of genuine local recruitment efforts, which typically include:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Advertising:</strong> Evidence of extensive advertising for the position on national recruitment websites (e.g., JobActive) for a specified period (usually at least 28 days), demonstrating that the role was genuinely open to Australian applicants.</li>
+                                <li><strong>Interview Records:</strong> Detailed records of interviews conducted with Australian applicants, including reasons why they were not suitable for the role (e.g., lack of specific skills, experience, or qualifications, or unsuitable cultural fit for a rural setting).</li>
+                                <li><strong>Justifications:</strong> A written statement explaining the challenges faced in recruiting locally, such as a lack of qualified candidates, insufficient interest from local applicants, or specific requirements of the role (e.g., bilingual skills, experience with particular care philosophies) that local candidates did not possess.</li>
+                                <li><strong>Labour Market Testing (LMT):</strong> Providing evidence of LMT activities conducted in accordance with Department of Home Affairs requirements.</li>
+                            </ul>
+                            <p class="mt-2">The Department scrutinizes these claims to ensure that overseas sponsorship is a last resort, used only when genuine skill shortages exist.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-4 text-center">✨ Generate Genuine Need Justification</h3>
+                    <p class="mb-4 text-neutral-700">Use this tool to draft a justification for needing an overseas childcare worker. Provide details about your local recruitment efforts and challenges.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="localEfforts" class="block text-sm font-medium text-neutral-700 mb-1">Describe local recruitment efforts (e.g., advertising, interviews):</label>
+                            <textarea id="localEfforts" rows="3" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500"></textarea>
+                        </div>
+                        <div>
+                            <label for="localChallenges" class="block text-sm font-medium text-neutral-700 mb-1">Describe challenges in finding local staff:</label>
+                            <textarea id="localChallenges" rows="3" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500"></textarea>
+                        </div>
+                        <button id="generateJustificationBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Generate Justification
+                        </button>
+                        <div id="justificationLoading" class="text-center text-sky-600 mt-2 hidden">Generating...</div>
+                        <div id="justificationOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This generated text is for informational purposes only and should be reviewed and verified by a registered migration agent or legal professional before use in official applications.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-4 text-center">✨ Draft Sponsored Role Job Description</h3>
+                    <p class="mb-4 text-neutral-700">Generate a job description for a sponsored childcare role. Include key details to attract suitable international candidates.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="jobRoleTitle" class="block text-sm font-medium text-neutral-700 mb-1">Role Title (e.g., Childcare Worker, Early Childhood Teacher):</label>
+                            <input type="text" id="jobRoleTitle" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="jobResponsibilities" class="block text-sm font-medium text-neutral-700 mb-1">Key Responsibilities (e.g., Plan and implement educational programs, Supervise children):</label>
+                            <textarea id="jobResponsibilities" rows="3" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500"></textarea>
+                        </div>
+                        <div>
+                            <label for="jobQualifications" class="block text-sm font-medium text-neutral-700 mb-1">Required Qualifications (e.g., Cert III ECEC, Bachelor of Early Childhood Education):</label>
+                            <input type="text" id="jobQualifications" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="jobExperience" class="block text-sm font-medium text-neutral-700 mb-1">Desired Experience (e.g., 1 year relevant experience, experience in rural settings):</label>
+                            <input type="text" id="jobExperience" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="jobLocation" class="block text-sm font-medium text-neutral-700 mb-1">Specific Rural Location (Optional, e.g., Toowoomba, Longreach):</label>
+                            <input type="text" id="jobLocation" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <button id="generateJobDescBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Draft Job Description
+                        </button>
+                        <div id="jobDescLoading" class="text-center text-sky-600 mt-2 hidden">Drafting...</div>
+                        <div id="jobDescOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This generated job description is a draft. Always review and customize it to your specific needs and legal requirements before publishing.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-4 text-center">✨ Relocation Support Checklist Generator</h3>
+                    <p class="mb-4 text-neutral-700">Generate a checklist of common relocation support items for sponsored childcare workers moving to a rural Queensland location.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="relocationLocation" class="block text-sm font-medium text-neutral-700 mb-1">Rural Queensland Location (e.g., Toowoomba, Longreach, Mount Isa):</label>
+                            <input type="text" id="relocationLocation" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <button id="generateRelocationChecklistBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Generate Checklist
+                        </button>
+                        <div id="relocationLoading" class="text-center text-sky-600 mt-2 hidden">Generating checklist...</div>
+                        <div id="relocationOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This checklist provides general suggestions. Specific support needs may vary. Always consult with the sponsored worker and local resources.</p>
+                    </div>
+                </div>
+
+                 <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-4 text-center">✨ DAMA Concession Explainer</h3>
+                    <p class="mb-4 text-neutral-700">Understand potential visa concessions under a specific DAMA for childcare roles.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="damaRegion" class="block text-sm font-medium text-neutral-700 mb-1">DAMA Region (e.g., Townsville North Queensland, Goldfields WA):</label>
+                            <input type="text" id="damaRegion" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="damaOccupation" class="block text-sm font-medium text-neutral-700 mb-1">Childcare Occupation (e.g., Child Care Worker, Family Day Care Worker):</label>
+                            <input type="text" id="damaOccupation" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500" value="Child Care Worker">
+                        </div>
+                        <button id="explainDamaConcessionsBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Explain Concessions
+                        </button>
+                        <div id="damaConcessionsLoading" class="text-center text-sky-600 mt-2 hidden">Explaining...</div>
+                        <div id="damaConcessionsOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This information is AI-generated based on general DAMA principles. Always refer to the specific DAMA's official documentation and consult with a migration agent.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="candidates" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold text-sky-700 mb-8 text-center">Information for Candidates</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <p class="mb-6 text-lg leading-relaxed">
+                    For international childcare professionals aspiring to work in Australia, meeting specific eligibility criteria is paramount. This section provides a detailed breakdown of the key requirements for candidates seeking sponsorship, including qualifications, work experience, English language proficiency, health and character checks, and the crucial role of a confirmed job offer. Understanding these aspects in depth will help you prepare a strong visa application.
+                </p>
+                 <div class="space-y-6">
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Qualifications</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>To be eligible for skilled migration as a childcare professional in Australia, you must hold qualifications that are recognized and deemed equivalent to Australian standards. The minimum qualification generally required for a Child Care Worker (ANZSCO 421111) is a Certificate III in Early Childhood Education and Care (CHC30121).</p>
+                            <p>For leadership roles or specialized positions, a Diploma of Early Childhood Education and Care (CHC50121) may be required. Early Childhood Teachers (ECTs) typically need a relevant Bachelor's degree or higher qualification in early childhood education.</p>
+                            <p><strong>ACECQA Assessment:</strong> For all overseas qualifications, an assessment by the Australian Children's Education and Care Quality Authority (ACECQA) is mandatory. ACECQA assesses whether your overseas qualifications are equivalent to the relevant Australian qualifications required for working in regulated ECEC services. This assessment is a critical step in the visa application process, as a positive outcome is often required for skills assessment and visa eligibility.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Work Experience</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>For the Skills in Demand (SID) 482 visa, candidates are generally required to have at least 1 year of full-time equivalent work experience in their nominated occupation or a closely related field. This experience must have been gained within the last 5 years. "Full-time equivalent" means working at least 38 hours per week, or a pro-rata equivalent if part-time.</p>
+                            <p>For Early Childhood Teachers (ECTs), a minimum of 1 year of full-time, paid employment experience is required. It's important that this experience is relevant to the duties of the nominated occupation as defined by ANZSCO (Australian and New Zealand Standard Classification of Occupations).</p>
+                            <p>Formal placements, internships, or apprenticeships can count towards this work experience requirement if they were part of a CRICOS registered course (Commonwealth Register of Institutions and Courses for Overseas Students) and involved structured workplace learning relevant to the occupation.</p>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">English Language Proficiency</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>Demonstrating English language proficiency is a mandatory requirement for most Australian skilled migration visas, including the SID 482 visa. Common tests accepted include:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>IELTS (International English Language Testing System):</strong> Typically a minimum overall score with no band less than a specified level (e.g., 5.0 or 6.0 in each of the four components: listening, reading, writing, and speaking).</li>
+                                <li><strong>PTE Academic (Pearson Test of English Academic):</strong> Equivalent scores are accepted.</li>
+                                <li>Other tests like OET, TOEFL iBT, and Cambridge English Advanced (CAE) may also be accepted.</li>
+                            </ul>
+                            <p class="mt-2">For Early Childhood Teachers (ECTs), ACECQA often has higher specific English language requirements for skills assessment, such as an IELTS Academic score of at least 7.0 for Reading and Writing, and 8.0 for Speaking and Listening.</p>
+                            <p>Designated Area Migration Agreement (DAMA) pathways may offer concessions or exemptions on English language requirements, making them more accessible for candidates who might not meet the standard thresholds. Exemptions from English testing may also apply to citizens of certain English-speaking countries (e.g., UK, USA, Canada, New Zealand, Ireland) or those who have completed specific tertiary study in English.</p>
+                        </div>
+                    </div>
+                     <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Health and Character Requirements</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>All visa applicants must meet Australia's health and character requirements. This involves:</p>
+                            <ul class="list-disc list-inside ml-4 space-y-1">
+                                <li><strong>Medical Examinations:</strong> Undergoing mandatory medical examinations conducted by a panel physician approved by the Australian government. This includes general health checks, chest X-rays, and blood tests to ensure you do not pose a public health risk.</li>
+                                <li><strong>Police Clearance Certificates:</strong> Providing police clearance certificates from your home country and any other country where you have lived for 12 months or more in the last 10 years since turning 16. These checks assess your criminal history and ensure you meet Australia's character requirements.</li>
+                            </ul>
+                            <p class="mt-2">In addition to federal immigration requirements, working with children in Queensland requires a Queensland Working with Children Check, commonly known as a "Blue Card." This is a separate state-based check that assesses the suitability of individuals to work with children and young people. You will need to apply for and obtain a Blue Card once you are in Queensland and before commencing work in a childcare setting.</p>
+                        </div>
+                    </div>
+                     <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Job Offer and Nomination</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>A confirmed job offer from an approved Australian employer is an essential prerequisite for most skilled migration visas, including the SID 482 visa. You cannot apply for these visas without an employer first nominating you for a specific position.</p>
+                            <p>Once an employer has received their Standard Business Sponsorship (SBS) approval and has nominated you for a position, they will provide you with a Transaction Reference Number (TRN) or a similar identifier. This TRN is crucial as you will need it to link your individual visa application to your employer's nomination. The nomination details, including the occupation, salary, and location, must align with your visa application to ensure a successful outcome.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="2xl font-semibold text-sky-600 mb-4 text-center">✨ Get Visa Eligibility Insights</h3>
+                    <p class="mb-4 text-neutral-700">Enter your details below to get a general, non-binding assessment of your potential eligibility for Australian skilled migration visas for childcare workers.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="candidateQualifications" class="block text-sm font-medium text-neutral-700 mb-1">Your Qualifications (e.g., Cert III ECEC from India, Bachelor of Early Childhood Education from UK):</label>
+                            <input type="text" id="candidateQualifications" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="candidateExperience" class="block text-sm font-medium text-neutral-700 mb-1">Your Work Experience (e.g., 2 years full-time as childcare worker, 1 year as ECT):</label>
+                            <input type="text" id="candidateExperience" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="candidateEnglish" class="block text-sm font-medium text-neutral-700 mb-1">Your English Proficiency (e.g., IELTS 6.5 overall, PTE 58):</label>
+                            <input type="text" id="candidateEnglish" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <button id="getEligibilityBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Get Eligibility Insights
+                        </button>
+                        <div id="eligibilityLoading" class="text-center text-sky-600 mt-2 hidden">Assessing...</div>
+                        <div id="eligibilityOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This assessment is generated by an AI based on general information and is NOT legal or immigration advice. Always consult a registered migration agent or official government sources for definitive guidance.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="2xl font-semibold text-sky-600 mb-4 text-center">✨ ACECQA Assessment Prep Guide</h3>
+                    <p class="mb-4 text-neutral-700">Get tailored advice on preparing for your ACECQA qualifications assessment.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="acecqaQualificationName" class="block text-sm font-medium text-neutral-700 mb-1">Your Overseas Qualification Name (e.g., Diploma in Early Childhood Education):</label>
+                            <input type="text" id="acecqaQualificationName" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="acecqaCountry" class="block text-sm font-medium text-neutral-700 mb-1">Country where Qualification was obtained:</label>
+                            <input type="text" id="acecqaCountry" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="acecqaYearsExperience" class="block text-sm font-medium text-neutral-700 mb-1">Years of Relevant Childcare Experience:</label>
+                            <input type="number" id="acecqaYearsExperience" min="0" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <button id="getAcecqaPrepBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Generate Prep Guide
+                        </button>
+                        <div id="acecqaLoading" class="text-center text-sky-600 mt-2 hidden">Generating guide...</div>
+                        <div id="acecqaOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This guide is generated by AI and provides general advice. Always refer to official ACECQA guidelines and seek professional advice for your specific assessment.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="2xl font-semibold text-sky-600 mb-4 text-center">✨ Rural Lifestyle Insights</h3>
+                    <p class="mb-4 text-neutral-700">Considering a move to rural Queensland? Get general insights into the lifestyle, community, and amenities in a specific region.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="lifestyleRegion" class="block text-sm font-medium text-neutral-700 mb-1">Rural Queensland Region (e.g., Darling Downs, Far North Queensland, Central West):</label>
+                            <input type="text" id="lifestyleRegion" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <button id="getLifestyleInsightsBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Get Lifestyle Insights
+                        </button>
+                        <div id="lifestyleLoading" class="text-center text-sky-600 mt-2 hidden">Generating insights...</div>
+                        <div id="lifestyleOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: These insights are general and AI-generated. Research specific towns and visit if possible for a full understanding of local conditions.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="2xl font-semibold text-sky-600 mb-4 text-center">✨ Local Services Guide</h3>
+                    <p class="mb-4 text-neutral-700">Get a general list of typical services available in a specific rural Queensland location, helpful for new arrivals.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="servicesLocation" class="block text-sm font-medium text-neutral-700 mb-1">Rural Queensland Location (e.g., Charleville, Emerald, Stanthorpe):</label>
+                            <input type="text" id="servicesLocation" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <button id="getServicesGuideBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Get Services Guide
+                        </button>
+                        <div id="servicesLoading" class="text-center text-sky-600 mt-2 hidden">Generating services list...</div>
+                        <div id="servicesOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This guide is AI-generated and provides general information. Availability of specific services may vary. Always verify with local councils or community organizations.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="2xl font-semibold text-sky-600 mb-4 text-center">✨ Rural Role Cover Letter Assistant</h3>
+                    <p class="mb-4 text-neutral-700">Get help drafting a cover letter snippet tailored for a rural childcare role.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="coverLetterRole" class="block text-sm font-medium text-neutral-700 mb-1">Desired Role (e.g., Childcare Worker, ECT):</label>
+                            <input type="text" id="coverLetterRole" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="coverLetterSkills" class="block text-sm font-medium text-neutral-700 mb-1">Your Key Skills/Experience (e.g., 3 years experience with toddlers, strong understanding of EYLF, passionate about community involvement):</label>
+                            <textarea id="coverLetterSkills" rows="3" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500"></textarea>
+                        </div>
+                        <div>
+                            <label for="coverLetterRuralAspects" class="block text-sm font-medium text-neutral-700 mb-1">Why are you interested in a rural Queensland role? (Optional, e.g., seeking close-knit community, love for outdoors):</label>
+                            <textarea id="coverLetterRuralAspects" rows="2" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500"></textarea>
+                        </div>
+                        <button id="generateCoverLetterBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Draft Cover Letter Snippet
+                        </button>
+                        <div id="coverLetterLoading" class="text-center text-sky-600 mt-2 hidden">Drafting snippet...</div>
+                        <div id="coverLetterOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This is an AI-generated draft. Always customize it to the specific job and your full experience. Professional review is recommended.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="support" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold text-sky-700 mb-8 text-center">Rural Realities & Support Systems</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <p class="mb-6 text-lg leading-relaxed">
+                    Relocating to and working in rural Queensland presents a unique blend of challenges and rewarding opportunities. Understanding these specific realities, coupled with awareness of available support systems and government initiatives, is key for both international migrants and sponsoring employers to ensure a successful, sustainable, and mutually beneficial placement. This section delves deeper into these aspects.
+                </p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Relocation & Integration Challenges for Migrants</h3>
+                        <p class="mb-2">Moving to a new country, especially a rural area, comes with its own set of hurdles:</p>
+                        <ul class="list-disc list-inside ml-4 text-neutral-700 space-y-1">
+                            <li><strong>Housing:</strong> Finding affordable and suitable accommodation can be challenging in rural areas, often requiring assistance with references, bond payments, and understanding local rental markets. Interim housing solutions upon arrival are often necessary.</li>
+                            <li><strong>Cultural & Social Integration:</strong> Adapting to a new culture, local customs, and Australian English can be difficult. Access to social networks and community activities is vital to combat isolation. Migrants may also face subtle or overt discrimination.</li>
+                            <li><strong>Access to Services:</strong> Navigating new healthcare systems, banking, transportation, and other essential services can be complex without proper guidance.</li>
+                            <li><strong>Support Needs:</strong> Access to dedicated settlement services, English language programs (like the Adult Migrant English Program - AMEP), and workers' rights education is crucial for successful integration. Organizations like Multicultural Australia play a vital role in providing this support.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Employer Challenges in Sponsoring & Retaining</h3>
+                        <p class="mb-2">Sponsoring and retaining international talent also poses specific challenges for childcare providers:</p>
+                         <ul class="list-disc list-inside ml-4 text-neutral-700 space-y-1">
+                            <li><strong>Administrative Burden:</strong> The visa application and nomination processes are complex, requiring meticulous documentation, adherence to strict timelines, and ongoing compliance with Department of Home Affairs regulations. This can be time-consuming and daunting for smaller rural businesses.</li>
+                            <li><strong>Financial Costs:</strong> Beyond the SAF levy and visa application fees, employers must ensure competitive wages that meet the CSIT and AMSR. Relocation assistance, if provided, adds to the financial outlay.</li>
+                            <li><strong>Retention Issues:</strong> Despite sponsorship, retaining staff in rural areas can be difficult due to factors like isolation, limited social opportunities, perceived lower pay compared to metropolitan areas, and a lack of clear career progression pathways within smaller rural services. High turnover can negate the benefits of sponsorship.</li>
+                            <li><strong>Integration Support:</strong> Employers are increasingly expected to provide or facilitate support for the integration of sponsored workers into the workplace and community, which can be an additional resource strain.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="text-2xl font-semibold text-sky-600 mb-4 text-center">Government Initiatives & Support Programs</h3>
+                    <p class="mb-4 text-center text-neutral-700">Both federal and state governments have recognized the critical nature of the childcare workforce shortage and have implemented various programs and initiatives to support the ECEC sector, providers, and rural communities. These programs aim to alleviate financial pressures, enhance skills, and improve living conditions, making rural placements more attractive and sustainable.</p>
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="p-3 bg-white rounded shadow">
+                            <h4 class="font-semibold text-neutral-800">Workforce Retention & Incentives</h4>
+                            <p class="text-sm text-neutral-600">Programs like the "Worker Retention Payment" offer financial incentives to ECEC providers who commit to increasing staff wages and limiting fee growth. Additionally, some initiatives provide discounted childcare for ECEC employees, aiming to attract and retain staff within the sector.</p>
+                        </div>
+                        <div class="p-3 bg-white rounded shadow">
+                            <h4 class="font-semibold text-neutral-800">Grants & Funding for Providers</h4>
+                            <p class="text-sm text-neutral-600">Providers can access funding through programs like the Community Child Care Fund (CCCF), which supports services in disadvantaged or vulnerable communities. Minor capital works grants are also available for sessional kindergartens in low socio-economic and rural and remote areas.</p>
+                        </div>
+                        <div class="p-3 bg-white rounded shadow">
+                            <h4 class="font-semibold text-neutral-800">Workforce Development & Training</h4>
+                            <p class="text-sm text-neutral-600">Initiatives such as the Practicum Placement Grant support students undertaking practical placements, while the Qualifications Pathways Program (QPP) assists existing workers in upskilling. The Rural & Remote Residential Program and the Remote Area Teacher Education Program (RATEP) are specific programs designed to develop and support ECEC professionals in regional and remote areas.</p>
+                        </div>
+                        <div class="p-3 bg-white rounded shadow">
+                            <h4 class="font-semibold text-neutral-800">Housing Assistance (Potential Models)</h4>
+                            <p class="text-sm text-neutral-600">While direct housing assistance for sponsored childcare workers is not explicitly detailed, the Rural and Remote Hardship Incentive Scheme (RRHIS) for teachers in Queensland state schools provides a potential model. This scheme offers relocation assistance and reasonable housing costs for up to 12 months, including temporary accommodation and a taxable rental allowance, often placing teachers in department-provided housing at no cost. The Queensland government's broader "Homes for Queenslanders" plan aims to deliver one million new homes over 20 years, including social and affordable housing across regional Queensland, which could indirectly ease housing pressures for essential workers. Additionally, organizations like HOPE Housing offer co-investment models for essential workers (including childcare workers) to purchase homes, currently in Greater Sydney but indicating a potential private sector solution.</p>
+                        </div>
+                    </div>
+                     <p class="mt-4 text-sm text-neutral-600 leading-relaxed">
+                        These government and sector-led initiatives are vital components of a holistic strategy to address the rural childcare crisis. Exploring these options is crucial for both employers seeking to attract and retain talent, and for candidates considering a move to regional Queensland, as they can significantly enhance the viability and attractiveness of rural placements.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="dama-application-guide" class="pt-16 -mt-16 mb-12">
+            <h1 class="text-3xl font-bold text-sky-700 mb-6 text-center">DAMA Skills Assessment Application Process Details</h1>
+            <div class="bg-white p-6 rounded-lg shadow-lg space-y-6">
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 1 – Am I eligible for a DAMA skills assessment?</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p>You are eligible to apply for an ACECQA DAMA skills assessment if your nominated occupation is one of the following (Child Care Worker, Family Day Care Worker, Preschool Aide, Out of School Hours Care Worker) and you intend to migrate to Australia under a specified DAMA program.</p>
+                        <h3 class="font-semibold text-neutral-800">Specific DAMA Programs by Occupation:</h3>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>
+                                <strong class="text-sky-700">Child Care Worker:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.ekcci.com.au/ek-dama/about-ek-dama/" class="text-sky-600 hover:underline"> (East) Kimberley Region in Western Australia</a></li>
+                                    <li><a href="https://www.cairnschamber.com.au/regional-migration/fnq-dama" class="text-sky-600 hover:underline">Far North Queensland</a></li>
+                                    <li><a href="https://www.ckb.wa.gov.au/business-development/designated-area-migration-agreement/dama.aspx" class="text-sky-600 hover:underline">Goldfields Western Australia</a></li>
+                                    <li><a href="https://gscdama.warrnambool.vic.gov.au/" class="text-sky-600 hover:underline">Great South Coast region of Victoria</a></li>
+                                    <li><a href="https://industry.nt.gov.au/migration-for-business/northern-territory-designated-area-migration-agreement" class="text-sky-600 hover:underline">Northern Territory</a></li>
+                                    <li><a href="http://www.rdaorana.org.au/migration/dama/" class="text-sky-600 hover:underline">Orana New South Wales</a></li>
+                                    <li><a href="https://www.rdapilbara.org.au/dama" class="text-sky-600 hover:underline">Pilbara Region in Western Australia</a></li>
+                                    <li><a href="https://migration.sa.gov.au/" class="text-sky-600 hover:underline">South Australia Regional</a></li>
+                                    <li><a href="https://www.dardanup.wa.gov.au/our-shire/about-us/south-west-dama.aspx" class="text-sky-600 hover:underline">South West Region of Western Australia</a></li>
+                                    <li><a href="https://www.townsvilleenterprise.com.au/skills-and-migration/" class="text-sky-600 hover:underline">Townsville</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong class="text-sky-700">Family Day Care Worker:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.ckb.wa.gov.au/business-development/designated-area-migration-agreement/dama.aspx" class="text-sky-600 hover:underline">Goldfields Western Australia</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong class="text-sky-700">Preschool Aide:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.ekcci.com.au/wp-content/uploads/2025/05/Kimberley-DAMA-Occupation-List-public-version-v5.0.pdf" class="text-sky-600 hover:underline">(East) Kimberley Region in Western Australia</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong class="text-sky-700">Out of School Hours Care Worker:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.cairnschamber.com.au/regional-migration/fnq-dama" class="text-sky-600 hover:underline">Far North Queensland</a></li>
+                                    <li><a href="https://www.rdapilbara.org.au/dama" class="text-sky-600 hover:underline">Pilbara Region in Western Australia</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <h3 class="font-semibold text-neutral-800">Before applying, it is highly recommended that you:</h3>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Check if your qualification appears on <a href="https://www.acecqa.gov.au/node/1090621/" class="text-sky-600 hover:underline">ACECQA's lists of approved qualifications</a>.</li>
+                            <li>Check if the visa you intend to apply for requires a skills assessment.</li>
+                            <li>Confirm which skilled occupation you require a skills assessment for.</li>
+                            <li>Confirm you have sufficient post-qualification employment experience in the nominated occupation.</li>
+                        </ul>
+                        <p class="text-red-700 font-semibold">
+                            Do NOT submit a DAMA skills assessment application if:
+                        </p>
+                        <ul class="list-disc list-inside ml-4 text-red-700">
+                            <li>❌ You have not completed your qualification</li>
+                            <li>❌ You do not meet the eligibility criteria</li>
+                            <li>❌ You already hold a valid skills assessment</li>
+                            <li>❌ You require a <a href="https://www.acecqa.gov.au/apply-migration-skills-assessment-new-page" class="text-sky-600 hover:underline">migration skills assessment</a> for the Child Care Centre Manager or Child Care Worker (group leaders only) occupations</li>
+                            <li>❌ You require a <a href="https://www.acecqa.gov.au/qualifications/provisional-skills-assessment" class="text-sky-600 hover:underline">provisional skills assessment</a></li>
+                            <li>❌ You do not have sufficient post-qualification employment experience</li>
+                            <li>❌ You require a skills assessment for an occupation for which ACECQA is not the approved Assessing Authority.</li>
+                        </ul>
+                        <p class="text-sm text-neutral-600">If any of the above apply to you, please call ACECQA (1300 422 327) for clarification.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 2 - Read the DAMA Skills Assessment Application Guidelines</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">ACECQA assesses applications against specific assessment standards for each DAMA program and occupation. It is crucial to read the relevant guidelines for your nominated occupation and region:</p>
+                        <h3 class="font-semibold text-neutral-800">Specific DAMA Assessment Standards by Occupation:</h3>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>
+                                <strong class="text-sky-700">Child Care Worker:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.acecqa.gov.au/media/34881" class="text-sky-600 hover:underline">East Kimberley Region in Western Australia (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34871" class="text-sky-600 hover:underline">Far North Queensland (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34866" class="text-sky-600 hover:underline">Goldfields Western Australia (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34901" class="text-sky-600 hover:underline">Great South Coast region of Victoria (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/41156" class="text-sky-600 hover:underline">Northern Territory (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34876" class="text-sky-600 hover:underline">Orana New South Wales (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34891" class="text-sky-600 hover:underline">Pilbara Region in Western Australia (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/36921" class="text-sky-600 hover:underline">South Australia regional (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34886" class="text-sky-600 hover:underline">South West Region of Western Australia (Child Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/34896" class="text-sky-600 hover:underline">Townsville (Child Care Worker) DAMA Assessment Standards</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong class="text-sky-700">Family Day Care Worker:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.acecqa.gov.au/media/34861" class="text-sky-600 hover:underline">Goldfields Western Australia (Family Day Care Worker) DAMA Assessment Standards</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong class="text-sky-700">Preschool Aide:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.ekcci.com.au/wp-content/uploads/2025/05/Kimberley-DAMA-Occupation-List-public-version-v5.0.pdf" class="text-sky-600 hover:underline">(East) Kimberley Region in Western Australia (Preschool Aide) DAMA Assessment Standards</a></li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong class="text-sky-700">Out of School Hours Care Worker:</strong>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.acecqa.gov.au/media/41146" class="text-sky-600 hover:underline">Far North Queensland (Out of School Hours Care Worker) DAMA Assessment Standards</a></li>
+                                    <li><a href="https://www.acecqa.gov.au/media/41151" class="text-sky-600 hover:underline">Pilbara Region in Western Australia (Out of School Hours Care Worker) DAMA Assessment Standards</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p class="text-sm text-neutral-600">If you are concerned that you may not satisfy these standards, you can seek general advice about the application process and assessment standards by calling 1300 422 327 or emailing <a href="mailto:skilledmigration@acecqa.gov.au" class="text-sky-600 hover:underline">skilledmigration@acecqa.gov.au</a>.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 3 - Prepare the required supporting documentation for your application</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">The supporting evidence required will depend on whether you already hold a suitable qualification or need your qualifications assessed under the NQF as part of your Migration Skills Assessment.</p>
+                        <h3 class="font-semibold text-neutral-800">If you hold a suitable qualification, you will need to provide:</h3>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>Your valid passport (open booklet, displaying identity/biometric pages)</li>
+                            <li>Evidence of change of name (if applicable)</li>
+                            <li>Evidence you hold an ACECQA nationally approved certificate III (or higher level) qualification (if applicable)</li>
+                            <li>Official certificate/parchment for your qualification/s</li>
+                            <li>Official academic transcript for your qualification/s (must include all years of study)</li>
+                            <li>Formal employment contract in the relevant occupation</li>
+                            <li>Formal position description in the relevant occupation</li>
+                            <li>Evidence of service registration/regulation for each period of relevant employment</li>
+                            <li><a href="https://www.acecqa.gov.au/media/41036" class="text-sky-600 hover:underline">Employer Reference Template</a> (completed by your employer) for all employment experience claimed</li>
+                            <li><a href="https://www.acecqa.gov.au/media/41031" class="text-sky-600 hover:underline">Employment Experience Template</a> (completed by you) for all employment experience claimed</li>
+                            <li>A complete <a href="https://www.acecqa.gov.au/media/34851" class="text-sky-600 hover:underline">DAMA Skills Assessment Applicant Declaration and Consent Form</a></li>
+                            <li>An <a href="https://www.acecqa.gov.au/media/28601" class="text-sky-600 hover:underline">Authorised Representative Declaration and Consent Form</a> (if nominating a representative)</li>
+                            <li>A <a href="https://www.acecqa.gov.au/media/31711" class="text-sky-600 hover:underline">Migration Agent Declaration and Consent Form</a> (if nominating a migration agent)</li>
+                        </ul>
+                        <h3 class="font-semibold text-neutral-800 mt-4">If you need your qualifications assessed under the NQF as part of your DAMA skills assessment, you will also need to provide:</h3>
+                        <ul class="list-disc list-inside ml-4">
+                            <li><a href="https://www.acecqa.gov.au/media/28646" class="text-sky-600 hover:underline">Certified colour copies</a> of your passport, change of name evidence, parchment and academic transcripts</li>
+                            <li>Evidence of <a href="https://www.acecqa.gov.au/media/41241" class="text-sky-600 hover:underline">English language proficiency</a></li>
+                            <li>A complete NQF Applicant Declaration and Consent Form (choose based on occupation):
+                                <ul class="list-disc list-inside ml-4">
+                                    <li><a href="https://www.acecqa.gov.au/media/28721" class="text-sky-600 hover:underline">NQF Applicant Declaration and Consent Form</a> (for Child Care Worker/Family Day Care Worker)</li>
+                                    <li><a href="https://www.acecqa.gov.au/media/28731" class="text-sky-600 hover:underline">NQF Applicant Declaration and Consent Form</a> (for Outside School Hours Care Worker)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p class="mt-2">Any documents in a language other than English must be formally translated. Both original language and English translations (certified colour copies) must be submitted.</p>
+                        <p class="text-sm text-neutral-600">For more information, refer to the <a href="https://www.acecqa.gov.au/media/31206" class="text-sky-600 hover:underline">DAMA Skills Assessment Application Guidelines</a>.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 4 – Take your documents to have them legally certified</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">**Only for applicants who do not currently hold an NQF approved qualification.**</p>
+                        <p class="mb-2">ACECQA requires certain documents to be provided as certified colour copies of your originals (see **Step 3** above). You will need to take both your original document and a colour copy of that document to a legally authorised person. Certifications must be in English, and applicants must not certify their own documents.</p>
+                        <p class="text-sm text-neutral-600">To provide correctly certified colour copies of your documents for this application, please refer to the <a href="https://www.acecqa.gov.au/media/28646" class="text-sky-600 hover:underline">certifying documents information sheet</a>.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 5 – Prepare your employment evidence</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">ACECQA requires evidence of how you demonstrated your skills while employed in the nominated occupation. To support this assessment, you must provide two employment templates, one completed by you, and one completed by your employer:</p>
+                        <ol class="list-decimal list-inside ml-4">
+                            <li>Have your employers/referees complete the <a href="https://www.acecqa.gov.au/media/41036" class="text-sky-600 hover:underline">Employer Reference Template</a>.</li>
+                            <li>Complete your <a href="https://www.acecqa.gov.au/media/41031" class="text-sky-600 hover:underline">Employment Experience Template</a>.</li>
+                        </ol>
+                        <p class="mt-2">These templates must be completed by you and your direct supervisor only and should address the assessment standards relevant to your nominated occupation. If it appears your templates have been prepared by someone else, they will not be accepted.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 6 – Scan your documents for uploading to your application</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">To provide an ‘Assessment Ready’ application, your documents must be:</p>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>A colour copy in high resolution (photographs preferred)</li>
+                            <li>Clearly visible – blurry or illegible documents will not be accepted</li>
+                            <li>In colour and correctly certified (see **Step 4** above - only for applicants who do not currently hold an NQF approved qualification)</li>
+                            <li>Centred on the page – documents missing edges or not aligned will not be accepted</li>
+                            <li>Showing the whole document being submitted – must display all edges</li>
+                            <li>In an acceptable file format (e.g.: .PDF, .JPEG, .PNG) – other formats may not be accepted</li>
+                            <li>Titled appropriately – multiple unnamed documents may not be accepted</li>
+                            <li>Collated in correct page order – if your document has multiple pages, this should be scanned in one file, in correct page order.</li>
+                        </ul>
+                        <p class="mt-2 text-red-700 font-semibold">Do not provide documents via GoogleDrive or other unsecured cloud-based links.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 7 – Begin online application and make payment</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">This application will take about 40 minutes to complete. During the application, you will be asked to provide supporting documents. All files submitted of scanned documents must be at a high resolution and appropriately titled. Please upload your documents using links provided in the online application.</p>
+                        <p class="mb-2">ACECQA is unable to assess your application until all the required information and documentation have been provided. This means the 60-day assessment period will not begin until an ‘Assessment Ready’ application has been provided.</p>
+                        <p class="font-semibold mt-4">It is your (and any nominated migration agent’s) responsibility to provide an ‘Assessment Ready’ application.</p>
+                        <p class="mt-4">**Are you submitting an application on behalf of someone else?**</p>
+                        <p class="mb-2">Our online application portal requires applicants to register before submitting their application. Registration allows both applicants and migration agents access to ACECQA’s application portal where they can prepare, submit or track the progress of their application. Please make sure you provide a genuine personal email address to receive your portal access information. Generic email addresses (e.g. info@email.com) will not be accepted for portal access.</p>
+                        <p class="mt-4">At the end of the application, you will be asked to pay the <a href="https://www.acecqa.gov.au/resources/applications/indexation-of-fees#part2" class="text-sky-600 hover:underline">application fee</a>.</p>
+                        <p class="mt-4">For frequently asked questions about DAMA skills assessments, click <a href="https://www.acecqa.gov.au/help/faq" class="text-sky-600 hover:underline">here</a>.</p>
+                        <p class="mt-2 text-red-700 font-semibold">Your application will not be submitted until you have processed payment. There is no refund if your application is unsuccessful or if you choose to withdraw the application after it has been submitted.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 8 – What happens to my application?</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">ACECQA will email you within 10 working days once your application has been received.</p>
+                        <p class="mb-2">ACECQA is committed to completing your assessment within 60 days from receiving all the information they require. If your application is missing information or documents, then the application process will be delayed.</p>
+                        <p class="mb-2 text-red-700 font-semibold">Giving false or misleading information is a serious offence. ACECQA undertakes routine checks to verify the information provided in your application and conducts thorough checking of submitted documents. They will notify the relevant Australian Government Department and law enforcement agency where they have reason to believe that false or misleading information is provided.</p>
+                        <p class="text-sm text-neutral-600">Your personal information will be used and stored in accordance with the Australian Privacy Principles which are set out in the Privacy Act 1988 (Cth) and their <a href="https://www.acecqa.gov.au/privacy-policy" class="text-sky-600 hover:underline">privacy policy</a>.</p>
+                    </div>
+                </div>
+
+                <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                    <div class="accordion-header flex justify-between items-center" @click="open = !open">
+                        <h2 class="text-xl font-semibold text-sky-600">Step 9/10 - How do I receive my outcome?</h2>
+                        <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                    </div>
+                    <div x-show="open" x-cloak class="accordion-content mt-3 text-neutral-700 space-y-2">
+                        <p class="mb-2">Once your application has been assessed, ACECQA will notify you of the outcome by email.</p>
+                        <p class="mb-2">If your application is successful, you will be able to submit your DAMA skills assessment as part of a visa application. Note: a successful DAMA skills assessment does not guarantee your visa will be granted.</p>
+                        <p class="mb-2">If your application is unsuccessful, you will receive reasons for the decision. If you have additional evidence or believe that evidence provided with your application has not adequately been considered, you can request a review of your skills assessment:</p>
+                        <ul class="list-disc list-inside ml-4">
+                            <li>For Child Care Worker: <a href="https://www.acecqa.gov.au/qualifications/provisional-skills-assessment/request-review-your-skills-assessment" class="text-sky-600 hover:underline">Request a review of your skills assessment</a></li>
+                            <li>For Family Day Care Worker and Outside School Hours Care Worker: <a href="https://www.acecqa.gov.au/request-review-your-skills-assessment-new-page" class="text-sky-600 hover:underline">Request a review of your skills assessment</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+         <section id="app-vision" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold text-sky-700 mb-8 text-center">The Vision: A Dedicated Recruitment App</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <p class="mb-4 text-lg leading-relaxed">
+                    The strategic report this navigator is based on culminates in recommending the development of a dedicated application. This app would aim to streamline the complex, multi-faceted process of connecting rural Queensland childcare providers with international candidates seeking sponsorship, thereby directly addressing the critical workforce shortages.
+                </p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Core App Functionality Envisioned:</h3>
+                        <ul class="list-disc list-inside text-neutral-700 space-y-1">
+                            <li><strong>Employer Portal:</strong> A comprehensive dashboard offering step-by-step guidance for Standard Business Sponsorship (SBS) application, tools for nomination support (including templates and checklists), financial calculators for SAF levy and CSIT, and compliance checklists to ensure adherence to immigration regulations.</li>
+                            <li><strong>Candidate Portal:</strong> An intuitive interface for visa eligibility self-assessment (covering SID 482, DAMA, and Training 407 visas), detailed guidance on ACECQA assessments (with links and checklists), a work experience calculator, an English proficiency checker, and secure document management for visa applications.</li>
+                            <li><strong>Matching Algorithm:</strong> A sophisticated system that intelligently connects employers and candidates based on a wide range of criteria, including qualifications, relevant work experience, specific visa eligibility (standard SID vs. DAMA pathways), regional preferences, and the employer's sponsorship capabilities (e.g., approved SBS status, DAMA participation, ability to meet CSIT through various guaranteed earnings).</li>
+                        </ul>
+                    </div>
+                     <div class="bg-amber-50 p-4 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-sky-600 mb-3">Enhanced Features for Rural Context:</h3>
+                        <ul class="list-disc list-inside text-neutral-700 space-y-1">
+                            <li><strong>Relocation & Integration Hub:</strong> A dedicated section providing vital resources for housing (e.g., local real estate listings, temporary accommodation options), information on community integration programs, and directories of local support networks and settlement services.</li>
+                            <li><strong>Retention Support:</strong> Resources focused on long-term retention, including information on professional development opportunities, clear career pathways within the Australian ECEC sector, and details on government incentives designed to encourage staff to stay in rural areas.</li>
+                            <li><strong>Cultural Competency Resources:</strong> Training modules and resources for employers to foster a culturally inclusive workplace, alongside integration resources for candidates to help them adapt to Australian culture and community life.</li>
+                        </ul>
+                    </div>
+                </div>
+                <p class="mt-6 text-md leading-relaxed">
+                    By simplifying complex immigration processes, providing granular, up-to-date information, and fostering crucial connections with relocation and integration support services, such an application could significantly transform rural childcare recruitment. This, in turn, would contribute to greater workforce stability, foster sustainable growth in regional ECEC services, and ultimately enhance the liveability and economic prosperity of rural Queensland communities. This navigator serves as an informational precursor, highlighting the key areas such a comprehensive app would address and the value it would bring.
+                </p>
+
+                <div class="mt-8 bg-stone-50 p-6 rounded-lg shadow">
+                    <h3 class="2xl font-semibold text-sky-600 mb-4 text-center">✨ Interactive App Matching Demo</h3>
+                    <p class="mb-4 text-neutral-700">Experience a simplified simulation of how the app's matching algorithm could work. Enter your preferences to see a potential match.</p>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="demoDesiredRole" class="block text-sm font-medium text-neutral-700 mb-1">Desired Role:</label>
+                            <select id="demoDesiredRole" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                                <option value="">Select Role</option>
+                                <option value="Childcare Worker">Childcare Worker</option>
+                                <option value="Early Childhood Teacher">Early Childhood Teacher</option>
+                                <option value="Family Day Care Worker">Family Day Care Worker</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="demoYearsExperience" class="block text-sm font-medium text-neutral-700 mb-1">Years of Experience:</label>
+                            <input type="number" id="demoYearsExperience" min="0" max="20" value="1" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="demoPreferredRegion" class="block text-sm font-medium text-neutral-700 mb-1">Preferred Region (e.g., Townsville, Western Downs, Any Rural QLD):</label>
+                            <input type="text" id="demoPreferredRegion" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500" value="Any Rural QLD">
+                        </div>
+                        <button id="runMatchingDemoBtn" class="w-full bg-sky-600 text-white py-2 px-4 rounded-md hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition duration-300">
+                            Find My Match
+                        </button>
+                        <div id="matchingLoading" class="text-center text-sky-600 mt-2 hidden">Searching for matches...</div>
+                        <div id="matchingOutput" class="mt-4 p-4 bg-white border border-stone-300 rounded-md llm-output hidden"></div>
+                        <p class="text-xs text-neutral-500 mt-2">Disclaimer: This is a simulated demo for illustrative purposes only. Actual app matching would be more complex and real-time.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
     </main>
 
+    <footer class="bg-neutral-800 text-amber-50 py-8 text-center">
+        <p class="text-sm">&copy; <span id="currentYear"></span> Rural Childcare Sponsorship Navigator. Information based on the "Sourcing Sponsored Childcare Professionals for Rural Queensland: A Strategic App Development Guide".</p>
+        <p class="text-xs mt-1">This is an informational tool. Always consult official government sources and registered migration agents for definitive advice.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
-        function showTab(tabId) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when a link is clicked
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
             });
+        });
 
-            // Show selected tab
-            document.getElementById(tabId).classList.remove('hidden');
-
-            // Update active state of nav links
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('onclick')?.includes(tabId)) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
+        // Smooth scroll for nav links and active state
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
                 }
             });
-        }
+        });
 
-        // Show home tab by default
-        showTab('home');
+        // Active link highlighting on scroll
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('header nav a, #mobile-menu a');
+
+        window.onscroll = () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 70) { // 70 to offset sticky header height
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active', 'text-sky-600', 'font-semibold');
+                link.classList.add('text-neutral-700');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active', 'text-sky-600', 'font-semibold');
+                    link.classList.remove('text-neutral-700');
+                }
+            });
+        };
+
+
+        // Chart.js: Crisis Statistics
+        const crisisStatsCtx = document.getElementById('crisisStatsChart').getContext('2d');
+        const crisisStatsChart = new Chart(crisisStatsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Western Downs: % Children (0-4) Accommodated', 'Maranoa: % Children (0-4) Accommodated', 'QLD: % Services Needing Waivers'],
+                datasets: [{
+                    label: 'Key Childcare Statistics (%)',
+                    data: [22, 39, 23.3],
+                    backgroundColor: [
+                        'rgba(56, 189, 248, 0.6)', // sky-400
+                        'rgba(14, 165, 233, 0.6)', // sky-500
+                        'rgba(2, 132, 199, 0.6)'   // sky-600
+                    ],
+                    borderColor: [
+                        'rgba(56, 189, 248, 1)',
+                        'rgba(14, 165, 233, 1)',
+                        'rgba(2, 132, 199, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Percentage (%)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            callback: function(value, index, values) {
+                                const label = this.getLabelForValue(value);
+                                if (label.length > 20) { // Wrap labels longer than 20 chars
+                                    const words = label.split(' ');
+                                    let lines = [''];
+                                    let currentLine = 0;
+                                    words.forEach(word => {
+                                        if ((lines[currentLine] + word).length > 16) { // Approx 16 chars per line
+                                            currentLine++;
+                                            lines[currentLine] = '';
+                                        }
+                                        lines[currentLine] += word + ' ';
+                                    });
+                                    return lines.map(line => line.trim());
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gemini API Integration for Employers: Genuine Need Justification
+        const generateJustificationBtn = document.getElementById('generateJustificationBtn');
+        const localEffortsInput = document.getElementById('localEfforts');
+        const localChallengesInput = document.getElementById('localChallenges');
+        const justificationLoading = document.getElementById('justificationLoading');
+        const justificationOutput = document.getElementById('justificationOutput');
+
+        generateJustificationBtn.addEventListener('click', async () => {
+            const localEfforts = localEffortsInput.value.trim();
+            const localChallenges = localChallengesInput.value.trim();
+
+            if (!localEfforts || !localChallenges) {
+                justificationOutput.textContent = 'Please provide details for both local recruitment efforts and challenges.';
+                justificationOutput.classList.remove('hidden');
+                return;
+            }
+
+            justificationLoading.classList.remove('hidden');
+            justificationOutput.classList.add('hidden');
+            justificationOutput.textContent = '';
+
+            const prompt = `As an Australian employer, I need to justify why I require an overseas childcare worker for a rural Queensland location. My recent local recruitment efforts included: "${localEfforts}". The specific challenges I face in finding local staff are: "${localChallenges}". Please draft a concise justification paragraph suitable for an immigration nomination application, emphasizing the genuine need for an overseas worker.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    justificationOutput.textContent = text;
+                } else {
+                    justificationOutput.textContent = 'Failed to generate justification. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating justification:', error);
+                justificationOutput.textContent = 'An error occurred while generating justification. Please try again later.';
+            } finally {
+                justificationLoading.classList.add('hidden');
+                justificationOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Integration for Employers: Draft Sponsored Role Job Description
+        const generateJobDescBtn = document.getElementById('generateJobDescBtn');
+        const jobRoleTitleInput = document.getElementById('jobRoleTitle');
+        const jobResponsibilitiesInput = document.getElementById('jobResponsibilities');
+        const jobQualificationsInput = document.getElementById('jobQualifications');
+        const jobExperienceInput = document.getElementById('jobExperience');
+        const jobLocationInput = document.getElementById('jobLocation');
+        const jobDescLoading = document.getElementById('jobDescLoading');
+        const jobDescOutput = document.getElementById('jobDescOutput');
+
+        generateJobDescBtn.addEventListener('click', async () => {
+            const roleTitle = jobRoleTitleInput.value.trim();
+            const responsibilities = jobResponsibilitiesInput.value.trim();
+            const qualifications = jobQualificationsInput.value.trim();
+            const experience = jobExperienceInput.value.trim();
+            const location = jobLocationInput.value.trim();
+
+            if (!roleTitle || !responsibilities || !qualifications || !experience) {
+                jobDescOutput.textContent = 'Please fill in Role Title, Key Responsibilities, Required Qualifications, and Desired Experience.';
+                jobDescOutput.classList.remove('hidden');
+                return;
+            }
+
+            jobDescLoading.classList.remove('hidden');
+            jobDescOutput.classList.add('hidden');
+            jobDescOutput.textContent = '';
+
+            const prompt = `Draft a job description for a sponsored childcare role in rural Queensland. The role title is "${roleTitle}". Key responsibilities include: "${responsibilities}". Required qualifications are: "${qualifications}". Desired experience is: "${experience}". ${location ? `The specific location is ${location}.` : ''} Emphasize aspects attractive to international candidates seeking sponsorship and mention the benefits of working in a rural setting. Structure it as a professional job advertisement.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    jobDescOutput.textContent = text;
+                } else {
+                    jobDescOutput.textContent = 'Failed to draft job description. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error drafting job description:', error);
+                jobDescOutput.textContent = 'An error occurred while drafting the job description. Please try again later.';
+            } finally {
+                jobDescLoading.classList.add('hidden');
+                jobDescOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Feature: Relocation Support Checklist Generator
+        const generateRelocationChecklistBtn = document.getElementById('generateRelocationChecklistBtn');
+        const relocationLocationInput = document.getElementById('relocationLocation');
+        const relocationLoading = document.getElementById('relocationLoading');
+        const relocationOutput = document.getElementById('relocationOutput');
+
+        generateRelocationChecklistBtn.addEventListener('click', async () => {
+            const location = relocationLocationInput.value.trim();
+
+            if (!location) {
+                relocationOutput.textContent = 'Please enter a rural Queensland location.';
+                relocationOutput.classList.remove('hidden');
+                return;
+            }
+
+            relocationLoading.classList.remove('hidden');
+            relocationOutput.classList.add('hidden');
+            relocationOutput.textContent = '';
+
+            const prompt = `Generate a concise checklist of common relocation support items that an employer in a rural Queensland location like "${location}" might provide or assist with for an international childcare worker moving to Australia. Focus on practical aspects like housing, initial setup, and community integration. Present as a bulleted list.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    relocationOutput.textContent = text;
+                } else {
+                    relocationOutput.textContent = 'Failed to generate relocation checklist. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating relocation checklist:', error);
+                relocationOutput.textContent = 'An error occurred while generating the relocation checklist. Please try again later.';
+            } finally {
+                relocationLoading.classList.add('hidden');
+                relocationOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Feature: DAMA Concession Explainer
+        const explainDamaConcessionsBtn = document.getElementById('explainDamaConcessionsBtn');
+        const damaRegionInput = document.getElementById('damaRegion');
+        const damaOccupationInput = document.getElementById('damaOccupation');
+        const damaConcessionsLoading = document.getElementById('damaConcessionsLoading');
+        const damaConcessionsOutput = document.getElementById('damaConcessionsOutput');
+
+        explainDamaConcessionsBtn.addEventListener('click', async () => {
+            const region = damaRegionInput.value.trim();
+            const occupation = damaOccupationInput.value.trim();
+
+            if (!region || !occupation) {
+                damaConcessionsOutput.textContent = 'Please provide both DAMA Region and Occupation.';
+                damaConcessionsOutput.classList.remove('hidden');
+                return;
+            }
+            damaConcessionsLoading.classList.remove('hidden');
+            damaConcessionsOutput.classList.add('hidden');
+            damaConcessionsOutput.textContent = '';
+
+            const prompt = `Explain the typical visa concessions (like salary threshold, English language requirements, age limits) that might be available for a "${occupation}" under a Designated Area Migration Agreement (DAMA) in the "${region}" region of Queensland, Australia. Base this on general DAMA principles and information available for Australian DAMAs. Clearly state this is general information and official DAMA documentation should always be consulted.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    damaConcessionsOutput.textContent = text;
+                } else {
+                    damaConcessionsOutput.textContent = 'Failed to explain DAMA concessions. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error explaining DAMA concessions:', error);
+                damaConcessionsOutput.textContent = 'An error occurred. Please try again.';
+            } finally {
+                damaConcessionsLoading.classList.add('hidden');
+                damaConcessionsOutput.classList.remove('hidden');
+            }
+        });
+
+
+        // Gemini API Integration for Candidates: Visa Eligibility Insights
+        const getEligibilityBtn = document.getElementById('getEligibilityBtn');
+        const candidateQualificationsInput = document.getElementById('candidateQualifications');
+        const candidateExperienceInput = document.getElementById('candidateExperience');
+        const candidateEnglishInput = document.getElementById('candidateEnglish');
+        const eligibilityLoading = document.getElementById('eligibilityLoading');
+        const eligibilityOutput = document.getElementById('eligibilityOutput');
+
+        getEligibilityBtn.addEventListener('click', async () => {
+            const qualifications = candidateQualificationsInput.value.trim();
+            const experience = candidateExperienceInput.value.trim();
+            const english = candidateEnglishInput.value.trim();
+
+            if (!qualifications || !experience || !english) {
+                eligibilityOutput.textContent = 'Please fill in all fields (Qualifications, Work Experience, English Proficiency) to get insights.';
+                eligibilityOutput.classList.remove('hidden');
+                return;
+            }
+
+            eligibilityLoading.classList.remove('hidden');
+            eligibilityOutput.classList.add('hidden');
+            eligibilityOutput.textContent = '';
+
+            const prompt = `I am an international childcare professional interested in working in rural Queensland, Australia. My qualifications are: "${qualifications}". I have: "${experience}" of work experience as a childcare worker. My English proficiency is: "${english}". Based on typical Australian skilled migration requirements for childcare workers (Skills in Demand 482 visa and Designated Area Migration Agreement (DAMA) concessions), please provide a general, non-binding assessment of my potential eligibility and highlight any areas I might need to improve. State clearly that this is not legal advice.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    eligibilityOutput.textContent = text;
+                } else {
+                    eligibilityOutput.textContent = 'Failed to get eligibility insights. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error getting eligibility insights:', error);
+                eligibilityOutput.textContent = 'An error occurred while getting eligibility insights. Please try again later.';
+            } finally {
+                eligibilityLoading.classList.add('hidden');
+                eligibilityOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Integration for Candidates: ACECQA Assessment Prep Guide
+        const getAcecqaPrepBtn = document.getElementById('getAcecqaPrepBtn');
+        const acecqaQualificationNameInput = document.getElementById('acecqaQualificationName');
+        const acecqaCountryInput = document.getElementById('acecqaCountry');
+        const acecqaYearsExperienceInput = document.getElementById('acecqaYearsExperience');
+        const acecqaLoading = document.getElementById('acecqaLoading');
+        const acecqaOutput = document.getElementById('acecqaOutput');
+
+        getAcecqaPrepBtn.addEventListener('click', async () => {
+            const qualificationName = acecqaQualificationNameInput.value.trim();
+            const country = acecqaCountryInput.value.trim();
+            const yearsExperience = acecqaYearsExperienceInput.value.trim();
+
+            if (!qualificationName || !country || !yearsExperience) {
+                acecqaOutput.textContent = 'Please fill in all fields (Qualification Name, Country, Years of Experience) to get the prep guide.';
+                acecqaOutput.classList.remove('hidden');
+                return;
+            }
+
+            acecqaLoading.classList.remove('hidden');
+            acecqaOutput.classList.add('hidden');
+            acecqaOutput.textContent = '';
+
+            const prompt = `I have a qualification named "${qualificationName}" from "${country}" and "${yearsExperience}" years of relevant childcare experience. I am preparing for an ACECQA assessment to have my overseas qualification recognized in Australia. Please provide a concise guide on key documents I should prepare and what aspects of my qualification and experience I should emphasize to demonstrate equivalence to Australian early childhood education and care standards. Provide actionable advice in bullet points.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    acecqaOutput.textContent = text;
+                } else {
+                    acecqaOutput.textContent = 'Failed to generate prep guide. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating ACECQA prep guide:', error);
+                acecqaOutput.textContent = 'An error occurred while generating the prep guide. Please try again later.';
+            } finally {
+                acecqaLoading.classList.add('hidden');
+                acecqaOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Feature: Rural Lifestyle Insights
+        const getLifestyleInsightsBtn = document.getElementById('getLifestyleInsightsBtn');
+        const lifestyleRegionInput = document.getElementById('lifestyleRegion');
+        const lifestyleLoading = document.getElementById('lifestyleLoading');
+        const lifestyleOutput = document.getElementById('lifestyleOutput');
+
+        getLifestyleInsightsBtn.addEventListener('click', async () => {
+            const region = lifestyleRegionInput.value.trim();
+
+            if (!region) {
+                lifestyleOutput.textContent = 'Please enter a rural Queensland region.';
+                lifestyleOutput.classList.remove('hidden');
+                return;
+            }
+
+            lifestyleLoading.classList.remove('hidden');
+            lifestyleOutput.classList.add('hidden');
+            lifestyleOutput.textContent = '';
+
+            const prompt = `Provide general insights into the lifestyle, community, and typical amenities one might find in a rural Queensland region like "${region}". Focus on aspects relevant to someone considering moving there for work, such as community spirit, outdoor activities, and access to services. Present as a concise paragraph.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    lifestyleOutput.textContent = text;
+                } else {
+                    lifestyleOutput.textContent = 'Failed to generate lifestyle insights. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating lifestyle insights:', error);
+                lifestyleOutput.textContent = 'An error occurred while generating lifestyle insights. Please try again later.';
+            } finally {
+                lifestyleLoading.classList.add('hidden');
+                lifestyleOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Feature: Local Services Guide
+        const getServicesGuideBtn = document.getElementById('getServicesGuideBtn');
+        const servicesLocationInput = document.getElementById('servicesLocation');
+        const servicesLoading = document.getElementById('servicesLoading');
+        const servicesOutput = document.getElementById('servicesOutput');
+
+        getServicesGuideBtn.addEventListener('click', async () => {
+            const location = servicesLocationInput.value.trim();
+
+            if (!location) {
+                servicesOutput.textContent = 'Please enter a rural Queensland location.';
+                servicesOutput.classList.remove('hidden');
+                return;
+            }
+
+            servicesLoading.classList.remove('hidden');
+            servicesOutput.classList.add('hidden');
+            servicesOutput.textContent = '';
+
+            const prompt = `Provide a general list of essential services and amenities typically available in a rural Queensland town like "${location}". Focus on categories relevant to new international arrivals, such as healthcare, banking, transportation, grocery stores, community groups, and emergency services. Present as a bulleted list.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    servicesOutput.textContent = text;
+                } else {
+                    servicesOutput.textContent = 'Failed to generate services guide. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error generating services guide:', error);
+                servicesOutput.textContent = 'An error occurred while generating the services guide. Please try again later.';
+            } finally {
+                servicesLoading.classList.add('hidden');
+                servicesOutput.classList.remove('hidden');
+            }
+        });
+
+        // Gemini API Feature: Rural Role Cover Letter Assistant
+        const generateCoverLetterBtn = document.getElementById('generateCoverLetterBtn');
+        const coverLetterRoleInput = document.getElementById('coverLetterRole');
+        const coverLetterSkillsInput = document.getElementById('coverLetterSkills');
+        const coverLetterRuralAspectsInput = document.getElementById('coverLetterRuralAspects');
+        const coverLetterLoading = document.getElementById('coverLetterLoading');
+        const coverLetterOutput = document.getElementById('coverLetterOutput');
+
+        generateCoverLetterBtn.addEventListener('click', async () => {
+            const role = coverLetterRoleInput.value.trim();
+            const skills = coverLetterSkillsInput.value.trim();
+            const ruralAspects = coverLetterRuralAspectsInput.value.trim();
+
+            if (!role || !skills) {
+                coverLetterOutput.textContent = 'Please provide Desired Role and Key Skills/Experience.';
+                coverLetterOutput.classList.remove('hidden');
+                return;
+            }
+            coverLetterLoading.classList.remove('hidden');
+            coverLetterOutput.classList.add('hidden');
+            coverLetterOutput.textContent = '';
+
+            const prompt = `Draft a concise cover letter snippet for an international candidate applying for a "${role}" position in rural Queensland. The candidate's key skills and experience are: "${skills}". ${ruralAspects ? `Their interest in a rural role stems from: "${ruralAspects}".` : ''} The snippet should highlight their suitability for a rural childcare setting, emphasizing adaptability and community focus.`;
+
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+            const payload = { contents: chatHistory };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    coverLetterOutput.textContent = text;
+                } else {
+                    coverLetterOutput.textContent = 'Failed to draft cover letter snippet. Please try again.';
+                }
+            } catch (error) {
+                console.error('Error drafting cover letter snippet:', error);
+                coverLetterOutput.textContent = 'An error occurred. Please try again.';
+            } finally {
+                coverLetterLoading.classList.add('hidden');
+                coverLetterOutput.classList.remove('hidden');
+            }
+        });
+
+
+        // Interactive App Matching Demo Logic
+        const runMatchingDemoBtn = document.getElementById('runMatchingDemoBtn');
+        const demoDesiredRoleInput = document.getElementById('demoDesiredRole');
+        const demoYearsExperienceInput = document.getElementById('demoYearsExperience');
+        const demoPreferredRegionInput = document.getElementById('demoPreferredRegion');
+        const matchingLoading = document.getElementById('matchingLoading');
+        const matchingOutput = document.getElementById('matchingOutput');
+
+        runMatchingDemoBtn.addEventListener('click', () => {
+            const desiredRole = demoDesiredRoleInput.value.trim();
+            const yearsExperience = parseInt(demoYearsExperienceInput.value, 10);
+            const preferredRegion = demoPreferredRegionInput.value.trim();
+
+            if (!desiredRole || isNaN(yearsExperience) || yearsExperience < 0 || !preferredRegion) {
+                matchingOutput.textContent = 'Please fill in all demo fields correctly.';
+                matchingOutput.classList.remove('hidden');
+                return;
+            }
+
+            matchingLoading.classList.remove('hidden');
+            matchingOutput.classList.add('hidden');
+            matchingOutput.textContent = '';
+
+            // Simulate a delay for demonstration purposes
+            setTimeout(() => {
+                let matchResult = '';
+                let matchFound = false;
+
+                if (desiredRole === 'Early Childhood Teacher' && yearsExperience >= 2) {
+                    matchResult = `Great news! Based on your ${yearsExperience} years of experience as an Early Childhood Teacher, we have several potential matches in regions like Townsville and Cairns. These roles often come with DAMA concessions and clear PR pathways.`;
+                    matchFound = true;
+                } else if (desiredRole === 'Childcare Worker' && yearsExperience >= 1 && preferredRegion.toLowerCase().includes('western downs')) {
+                    matchResult = `Excellent! Your profile as a Childcare Worker with ${yearsExperience} year(s) of experience is highly sought after in Western Downs. We have immediate openings that qualify for SID visa sponsorship.`;
+                    matchFound = true;
+                } else if (desiredRole === 'Childcare Worker' && yearsExperience >= 1 && preferredRegion.toLowerCase().includes('any rural qld')) {
+                    matchResult = `Good potential! As a Childcare Worker with ${yearsExperience} year(s) of experience, you have strong prospects across various rural Queensland locations. Many services are actively seeking sponsored candidates.`;
+                    matchFound = true;
+                } else if (desiredRole === 'Family Day Care Worker' && yearsExperience >= 1) {
+                    matchResult = `Positive outlook! Your experience as a Family Day Care Worker with ${yearsExperience} year(s) is in demand. We can connect you with providers looking for flexible and community-focused individuals.`;
+                    matchFound = true;
+                } else {
+                    matchResult = `Currently, based on your selections, direct matches are limited. Consider gaining more experience or exploring the Training Visa (Subclass 407) as a stepping stone. Our app can help you identify skill development opportunities.`;
+                }
+
+                matchingOutput.textContent = matchResult;
+                matchingLoading.classList.add('hidden');
+                matchingOutput.classList.remove('hidden');
+            }, 1500); // Simulate 1.5 second loading time
+        });
     </script>
 </body>
 </html>
