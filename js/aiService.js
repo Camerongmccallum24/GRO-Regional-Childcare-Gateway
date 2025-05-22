@@ -1,13 +1,10 @@
 
-const { OpenAIApi, Configuration } = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 class AIService {
   constructor() {
-    this.openai = new OpenAIApi(
-      new Configuration({
-        apiKey: process.env.OPENAI_API_KEY
-      })
-    );
+    this.genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
   }
 
   async generateDAMAAdvice(userInput) {
@@ -15,12 +12,9 @@ class AIService {
     ${userInput}`;
     
     try {
-      const response = await this.openai.createCompletion({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 500
-      });
-      return response.data.choices[0].message.content;
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
     } catch (error) {
       console.error('AI Service Error:', error);
       return 'Unable to generate advice at this moment.';
@@ -32,12 +26,9 @@ class AIService {
     ${JSON.stringify(profile)}`;
     
     try {
-      const response = await this.openai.createCompletion({
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 300
-      });
-      return response.data.choices[0].message.content;
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
     } catch (error) {
       console.error('AI Service Error:', error);
       return 'Unable to analyze profile at this moment.';
