@@ -53,6 +53,7 @@
                     <a href="#candidates" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">For Candidates</a>
                     <a href="#support" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">Rural Realities</a>
                     <a href="#app-vision" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">App Vision</a>
+                    <a href="#dama" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">DAMA Guide</a>
                 </nav>
                 <div class="md:hidden">
                     <button id="mobile-menu-button" class="text-neutral-700 hover:text-sky-600 focus:outline-none">
@@ -70,6 +71,7 @@
             <a href="#candidates" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">For Candidates</a>
             <a href="#support" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">Rural Realities</a>
             <a href="#app-vision" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">App Vision</a>
+            <a href="#dama" class="block nav-link px-4 py-2 text-sm text-neutral-700 hover:bg-amber-50">DAMA Guide</a>
         </div>
     </header>
 
@@ -651,6 +653,58 @@
                     </div>
                 </div>
 
+            </div>
+        </section>
+
+        <section id="dama" class="pt-16 -mt-16 mb-12">
+            <h2 class="text-3xl font-bold text-sky-700 mb-8 text-center">DAMA Assessment Guide</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <p class="mb-6 text-lg leading-relaxed">
+                    A Designated Area Migration Agreement (DAMA) skills assessment is for applicants applying for a skilled migration visa under a DAMA. This section provides detailed guidance on the DAMA assessment process and requirements.
+                </p>
+                <div class="space-y-6">
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Eligibility & Requirements</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>ACECQA is the approved Assessing Authority for the following DAMA childcare occupations:</p>
+                            <ul class="list-disc list-inside ml-4">
+                                <li>Child Care Worker</li>
+                                <li>Family Day Care Worker</li>
+                                <li>Preschool Aide</li>
+                                <li>Out of School Hours Care Worker</li>
+                            </ul>
+                            <p class="mt-2">To be eligible, you must:</p>
+                            <ul class="list-disc list-inside ml-4">
+                                <li>Have completed your qualification</li>
+                                <li>Meet the eligibility criteria for your specific DAMA region</li>
+                                <li>Have sufficient post-qualification employment experience</li>
+                                <li>Be applying for an occupation where ACECQA is the approved Assessing Authority</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div x-data="{ open: false }" class="bg-amber-50 p-4 rounded-lg shadow">
+                        <button @click="open = !open" class="flex justify-between items-center w-full text-left">
+                            <h3 class="text-xl font-semibold text-sky-600">Application Process</h3>
+                            <span x-text="open ? '−' : '+'" class="text-2xl text-sky-600"></span>
+                        </button>
+                        <div x-show="open" x-cloak class="mt-3 text-neutral-700 space-y-2">
+                            <p>The application process involves several key steps:</p>
+                            <ol class="list-decimal list-inside ml-4">
+                                <li>Check eligibility and DAMA region requirements</li>
+                                <li>Prepare required documentation</li>
+                                <li>Have documents legally certified</li>
+                                <li>Complete employment evidence templates</li>
+                                <li>Submit online application and payment</li>
+                            </ol>
+                            <p class="mt-2">Processing time is typically 60 days once all required documentation is received.</p>
+                            <a href="/dama" class="mt-4 inline-block text-sky-600 hover:text-sky-700">View Full DAMA Guide →</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
