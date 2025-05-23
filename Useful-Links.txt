@@ -1,2 +1,5 @@
 #Create an ImmiAccount to access the Department of Home Affairs's online services
 https://online.immi.gov.au/lusc/login
+
+
+https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-processing-times/global-visa-processing-times#
