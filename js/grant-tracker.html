@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grant Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .airtable-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 70%; /* Aspect ratio for responsive iframe */
+      height: 0;
+      overflow: hidden;
+    }
+    .airtable-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Grant Tracker</h1>
+    <p>This embedded Airtable view shows your tracked grants and applications.</p>
+    <div class="airtable-container">
+      <iframe
+        class="airtable-embed"
+        src="https://airtable.com/embed/appmj6gFeUhvjESYV/shrT1WAx26SIo3JuD"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+</body>
+</html>
