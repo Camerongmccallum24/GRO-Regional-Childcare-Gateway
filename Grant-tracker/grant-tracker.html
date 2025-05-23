@@ -4,36 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grant Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 20px;
-    }
     .airtable-container {
       position: relative;
       width: 100%;
-      padding-bottom: 70%; /* Aspect ratio for responsive iframe */
+      padding-bottom: 85vh;
       height: 0;
       overflow: hidden;
+      background: #f0f0f0;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
-    .airtable-container iframe {
+    .airtable-container::before {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
+      right: 0;
+      height: 28px;
+      background: #e0e0e0;
+      border-radius: 12px 12px 0 0;
+      z-index: 1;
+    }
+    .airtable-container::after {
+      content: '⭕ ⭕ ⭕';
+      position: absolute;
+      top: 6px;
+      left: 10px;
+      color: #666;
+      font-size: 14px;
+      z-index: 2;
+    }
+    .airtable-container iframe {
+      position: absolute;
+      top: 28px;
+      left: 0;
       width: 100%;
-      height: 100%;
-      border: 1px solid #ccc;
+      height: calc(100% - 28px);
+      border: none;
+      border-radius: 0 0 12px 12px;
     }
   </style>
 </head>
-<body>
-  <div class="container">
+<body class="bg-slate-900 text-slate-100">
+  <header class="sticky-nav glass shadow-lg backdrop-blur-lg">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <span class="font-bold text-xl text-sky-700">Childcare Sponsorship Navigator</span>
+        </div>
+        <nav class="hidden md:flex items-center space-x-4">
+          <a href="/" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700 hover:text-sky-600">Home</a>
+          <a href="Grant-tracker/grant-tracker.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-sky-600">Grant Tracker</a>
+          <a href="workplace-demand/Workplace-Demands.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700 hover:text-sky-600">Workforce Demands</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+  
+  <div class="container mx-auto px-4 py-8">
     <h1>Grant Tracker</h1>
     <p>This embedded Airtable view shows your tracked grants and applications.</p>
     <div class="airtable-container">
