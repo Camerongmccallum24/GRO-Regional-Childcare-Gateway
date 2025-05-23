@@ -36,16 +36,32 @@
                 <div class="flex items-center">
                     <span class="font-bold text-xl text-sky-700">Childcare Sponsorship Navigator</span>
                 </div>
-                <nav class="hidden md:flex space-x-4">
-                    <a href="#crisis" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">The Crisis</a>
-                    <a href="#visas" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">Visa Pathways</a>
-                    <a href="#employers" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">For Employers</a>
-                    <a href="#candidates" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">For Candidates</a>
-                    <a href="#support" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">Rural Realities</a>
-                    <a href="#dama-application-guide" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">DAMA Guide</a>
-                    <a href="#app-vision" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">App Vision</a>
-                    <a href="#workforce-demands" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700">Workforce Demands</a>
-                </nav>
+                <nav class="hidden md:flex items-center space-x-4">
+        <!-- Main App Section -->
+        <div class="relative group">
+            <button class="nav-link px-3 py-2 rounded-md text-sm font-medium text-neutral-700 hover:text-sky-600">
+                Main Navigation ▾
+            </button>
+            <div class="absolute hidden group-hover:block w-48 bg-white shadow-lg rounded-md py-1 z-50">
+                <a href="#crisis" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">The Crisis</a>
+                <a href="#visas" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">Visa Pathways</a>
+                <a href="#employers" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">For Employers</a>
+                <a href="#candidates" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">For Candidates</a>
+                <a href="#support" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">Rural Realities</a>
+                <a href="#dama-application-guide" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">DAMA Guide</a>
+                <a href="#app-vision" class="block px-4 py-2 text-sm text-neutral-700 hover:bg-sky-50">App Vision</a>
+            </div>
+        </div>
+
+        <!-- Separate Apps Section -->
+        <div class="h-6 w-px bg-neutral-300"></div>
+        <a href="Grant-tracker/grant-tracker.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-blue-600 hover:text-blue-800">
+            Grant Tracker App
+        </a>
+        <a href="workplace-demand/Workplace-Demands.html" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-blue-600 hover:text-blue-800">
+            Workforce Demands App
+        </a>
+</nav>
                 <div class="md:hidden">
                     <button id="mobile-menu-button" class="text-neutral-700 hover:text-sky-600 focus:outline-none">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -285,7 +301,7 @@
                             <textarea id="jobResponsibilities" rows="3" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500"></textarea>
                         </div>
                         <div>
-                            <label for="jobQualifications" class="block text-sm font-medium text-neutral-700 mb-1">Required Qualifications (e.g., Cert III ECEC, Bachelor of Early Childhood Education):</label>
+                            <label for="jobQualifications" class="block text-sm font-medium text-neutral-700 mb-1">RequiredQualifications (e.g., Cert III ECEC, Bachelor of Early Childhood Education):</label>
                             <input type="text" id="jobQualifications" class="w-full p-2 border border-stone-300 rounded-md focus:ring-sky-500 focus:border-sky-500">
                         </div>
                         <div>
