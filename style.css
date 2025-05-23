@@ -244,6 +244,60 @@ html {
   background-color: var(--background);
   color: var(--text);
 
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .card {
+    margin: 0.5rem 0;
+  }
+  
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .nav-link {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Mobile Navigation */
+@media (max-width: 640px) {
+  .sticky-nav {
+    padding: 0.5rem;
+  }
+  
+  .mobile-menu {
+    width: 100%;
+  }
+  
+  .card {
+    border-radius: 0.5rem;
+  }
+  
+  input, textarea, select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* PWA Support */
+@media (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
 /* Enhanced animations and transitions */
 .transition-all {
   transition: all 0.3s ease-in-out;
