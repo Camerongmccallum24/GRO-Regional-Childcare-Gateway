@@ -8,7 +8,7 @@ import pandas as pd
 from datetime import datetime
 from config import Config
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), 'Templates'))
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)

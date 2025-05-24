@@ -2,7 +2,10 @@ import os
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///instance/grant_tracker.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        f"sqlite:///{os.path.join(os.path.dirname(os.path.dirname(__file__)), 'instance', 'grant_tracker.sqlite')}"
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static', 'uploads')
     MAIL_SERVER = 'smtp.example.com'
