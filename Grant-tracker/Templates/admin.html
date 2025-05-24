@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin Panel | Grant Tracker</title></head>
+<body>
+  <h2>Admin Panel</h2>
+  <a href="{{ url_for('logout') }}">Logout</a>
+  <table>
+    <tr><th>Name</th><th>Applicant</th><th>Status</th><th>Action</th></tr>
+    {% for g in grants %}
+      <tr>
+        <td>{{ g.name }}</td>
+        <td>{{ g.applicant }}</td>
+        <td>{{ g.status }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('update_status', grant_id=g.id) }}">
+            <select name="status">
+              <option>Pending</option>
+              <option>Approved</option>
+              <option>Rejected</option>
+            </select>
+            <button type="submit">Update</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <a href="{{ url_for('export_csv') }}">Export CSV</a>
+</body>
+</html>
