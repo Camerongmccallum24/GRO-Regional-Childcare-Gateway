@@ -4,7 +4,7 @@
   "main": "script.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "python3 Grant-tracker/app.py"
+    "dev": "serve ."
   },
   "keywords": [],
   "author": "",
@@ -13,5 +13,8 @@
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^16.5.0"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
 }
